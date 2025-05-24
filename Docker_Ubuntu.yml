@@ -1,0 +1,33 @@
+- hosts: localhost
+   become: yes
+   tasks:
+    - name: "Update a system"
+      apt:
+        update_cache: true  
+    - name: "Installing the dependencies of docker"
+      apt:
+        name:
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release  
+        state: "present" 
+    - name: "Adding gpg key"
+      apt_key:
+        
+         url: https://download.docker.com/linux/ubuntu/gpg 
+         state: present
+    - name: "Add the repo"
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+        state: present
+    - name: "Update a system"
+      apt:
+        update_cache: true      
+    - name: "install the docker engine"
+      apt:
+        name:  
+            - docker-ce
+            - docker-ce-cli
+            - containerd.io
+        state: present
