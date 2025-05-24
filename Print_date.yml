@@ -1,0 +1,21 @@
+- name: Script for print Message and run date command on managed node
+  hosts: all
+  tasks:
+    - name: Check Connection
+      ansible.builtin.ping:
+
+
+    - name: Print message hello world
+      ansible.builtin.debug:
+        msg: Hello world
+
+    - name: Run date command 
+      ansible.builtin.command:
+        cmd: date
+      register: date_output
+
+    - name: Show date result
+      ansible.builtin.debug:
+        var: date_output.stdout
+
+    
