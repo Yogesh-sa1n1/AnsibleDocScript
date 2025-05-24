@@ -1,0 +1,9 @@
+- name: Shutdown all managed nodes
+  hosts: all   # or replace with a specific group like [webservers]
+  become: yes
+  tasks:
+    - name: Shut down the system
+      ansible.builtin.command: shutdown -h now
+      async: 1
+      poll: 0
+      ignore_errors: yes
