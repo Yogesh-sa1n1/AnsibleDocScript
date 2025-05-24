@@ -1,0 +1,11 @@
+- name: Create directory for my app
+  hosts: all
+  become: yes
+  tasks:
+    - name: Create /opt/myapp/logs
+      ansible.builtin.file:
+        path: /opdfs/myapp/logs
+        state: directory
+        mode: '0755'
+        owner: ec2-user
+        group: ec2-user
