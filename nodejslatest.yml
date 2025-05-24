@@ -1,0 +1,35 @@
+- name: Install NVM and Node.js 22
+  hosts: all
+  become: yes
+  vars:
+    nvm_version: "v0.40.3"
+    node_version: "22"
+    user_home: "/home/ubuntu"
+    nvm_dir: "{{user_home}}/.nvm"
+
+  tasks:
+    - name: Install curl
+      apt:
+        name: curl
+        state: present
+        update_cache: yes
+
+    - name: Download and install NVM
+      become: false
+      shell: |
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+      args:
+        executable: /bin/bash
+      environment:
+        HOME: "{{ user_home }}"
+
+    - name: Load NVM and install Node.js {{ node_version }}
+      become: false
+      shell: |
+        export NVM_DIR="{{ nvm_dir }}"
+        . "$NVM_DIR/nvm.sh"
+        nvm install {{ node_version }}
+      args:
+        executable: /bin/bash
+      environment:
+        HOME: "{{ user_home }}"
