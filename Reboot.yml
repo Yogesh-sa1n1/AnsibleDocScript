@@ -1,0 +1,11 @@
+- name: Reboot all managed nodes quickly
+  hosts: all
+  become: yes
+  tasks:
+    - name: Reboot the system
+      ansible.builtin.reboot:
+        reboot_timeout: 120              # Wait max 120 seconds
+        msg: "Reboot initiated by Ansible"
+        pre_reboot_delay: 0             # No delay before reboot
+        post_reboot_delay: 5            # Wait 5 seconds before checking
+        test_command: whoami            # Basic test to check if system is up
