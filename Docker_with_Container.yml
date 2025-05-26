@@ -1,0 +1,62 @@
+---
+# tasks file for docker
+  - name: update package apt
+    apt:
+      update_cache: true
+
+  - name: install al dependencies
+    apt:
+      name:
+        - curl
+        - ca-certificates
+        - gnupg
+        - lsb-release
+      state: present
+
+  - name: Adding gpg key
+    apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      state: present
+
+  - name: Add the repo
+    apt_repository:
+      repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable"
+
+  - name: "Update a system"
+    apt:
+      update_cache: true
+
+  - name: "install the docker engine"
+    apt:
+      name:  
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+      state: present
+
+  - name: "Start and enable Docker"
+    service:
+      name: docker
+      state: started
+      enabled: yes
+
+  - name: pull nginx image
+    community.docker.docker_image:
+      name: nginx
+      source: pull
+
+  - name: Copy website files to target host
+    copy:
+      src: /home/yogesh/Desktop/Website
+      dest: /tmp/site
+      mode: 0644
+
+  - name: Run Nginx container with mounted website
+    community.docker.docker_container:
+        name: mynginx
+        image: nginx
+        ports:
+          - "80:80"
+        volumes:
+          - "/tmp/site:/usr/share/nginx/html:ro"
+        restart_policy: always
