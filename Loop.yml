@@ -1,0 +1,48 @@
+---
+- name: Demo - Practice variables, lists, loops
+  hosts: web
+  become: yes
+
+  vars:
+    web_packages:
+      - nginx
+      - git
+    homepage_title: "Welcome to My Ansible Site"
+    homepage_message: "This site was configured by Ansible!"
+
+  tasks:
+    - name: Install required packages (loop + list)
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      loop: "{{ web_packages }}"
+
+    - name: Create web root directory
+      file:
+        path: /var/www/mywebsite
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: '0755'
+
+    - name: Deploy custom homepage (template + variable)
+      template:
+        src: templates/index.html.j2
+        dest: /var/www/mywebsite/index.html
+        owner: www-data
+        group: www-data
+        mode: '0644'
+      notify: Restart Nginx
+
+    - name: Ensure Nginx is running
+      service:
+        name: nginx
+        state: started
+        enabled: true
+
+  handlers:
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted

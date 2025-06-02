@@ -1,0 +1,59 @@
+🧪 Example: Simple GET Request
+---
+- name: API GET call example
+  hosts: localhost
+  tasks:
+    - name: Get data from a public API
+      uri:
+        url: "https://api.github.com"
+        method: GET
+        return_content: yes
+      register: api_response
+
+    - name: Show response
+      debug:
+        var: api_response.json
+
+
+
+📤 Example: POST with JSON Payload
+---
+- name: API POST call example
+  hosts: localhost
+  tasks:
+    - name: Send POST request with JSON data
+      uri:
+        url: "https://httpbin.org/post"
+        method: POST
+        headers:
+          Content-Type: "application/json"
+        body: '{"name": "Ansible", "type": "tool"}'
+        body_format: json
+        return_content: yes
+      register: post_response
+
+    - name: Show response
+      debug:
+        var: post_response.json
+
+
+
+🔐 Example: API with Bearer Token (Auth)
+---
+- name: Authenticated API call
+  hosts: localhost
+  vars:
+    token: "your_api_token_here"
+  tasks:
+    - name: Call API with token
+      uri:
+        url: "https://api.example.com/v1/data"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ token }}"
+        return_content: yes
+      register: secure_response
+
+    - name: Show response
+      debug:
+        var: secure_response.json
