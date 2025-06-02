@@ -1,0 +1,107 @@
+# tasks file for ec2_instance
+
+- name: task for launch ec2 instance
+  amazon.aws.ec2_instance:
+    name: "ec2instance"
+    key_name: M1
+    region: us-east-1
+    image_id: ami-084568db4383264d4
+    instance_type: t2.micro
+    wait: true
+    count: 1
+    network:
+      assign_public_ip: true
+    security_groups: launch-wizard-1
+    tags:
+      Evn: Test
+  register: ec2
+
+- name: add the new ec2 instance to host group
+  add_host:
+    name: "{{item.public_ip_address}}"
+    group: launched
+    ansible_user: ubuntu
+    ansible_ssh_private_key_file: ~/.ssh/M1.pem
+  loop: "{{ec2.instances}}"
+
+- name: Wait for SSH to be available
+  wait_for:
+    host: "{{ item.public_ip_address }}"
+    port: 22
+    delay: 20
+    timeout: 300
+    state: started
+  loop: "{{ ec2.instances }}"
+
+- name: Show public IP address
+  debug:
+    msg: "{{ item.public_ip_address }}"
+  loop: "{{ ec2.instances }}"
+
+- name: Save instance IP to hosts file
+  lineinfile:
+    path: "../hosts"
+    line: "{{ item.public_ip_address }}"
+    create: yes
+  loop: "{{ ec2.instances }}"
+
+
+- name: Show all hosts in group 'launched'
+  debug:
+    var: groups['launched']
+
+
+
+
+Roles file
+---
+- name: playbook for creating ec2 instance
+  hosts: localhost
+  gather_facts: no
+  connection: local
+  vars:
+    ansible_python_interpreter: "{{ lookup('env','HOME') }}/.venvs/ansible-aws/bin/python"
+  become: true
+  roles:
+     - ec2_instance
+
+
+
+✅ Let’s Set This Up Step by Step
+🔹 Step 1: Install venv if it’s not already installed
+
+Run this once:
+
+sudo apt install python3.12-venv
+
+🔹 Step 2: Create a virtual environment
+
+Create one in your home directory:
+
+python3.12 -m venv ~/.venvs/ansible-aws
+
+🔹 Step 3: Activate the environment
+
+source ~/.venvs/ansible-aws/bin/activate
+
+Your shell prompt should change (e.g., it might start with (ansible-aws)), showing you're inside the virtual environment.
+🔹 Step 4: Install required AWS libraries
+
+pip install boto3 botocore
+
+(Optional: install Ansible too if you want to run everything inside the same virtualenv):
+
+pip install ansible amazon.aws
+
+🔹 Step 5: Tell Ansible to use the virtual environment’s Python
+
+If using a playbook:
+
+- hosts: localhost
+  vars:
+    ansible_python_interpreter: "{{ lookup('env','HOME') }}/.venvs/ansible-aws/bin/python"
+
+If using inventory.ini:
+
+[local]
+localhost ansible_connection=local ansible_python_interpreter=~/.venvs/ansible-aws/bin/python
